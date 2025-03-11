@@ -1,24 +1,33 @@
 import { useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/router";
 import { supabase } from "../lib/supabase";
-import axios from "axios";
 
 export default function Dashboard() {
+    const { data: session, status } = useSession();
     const [balance, setBalance] = useState(0);
+    const router = useRouter();
 
     useEffect(() => {
-        async function fetchBalance() {
-            const { data } = await supabase.from("users").select("balance").single();
-            setBalance(data?.balance || 0);
+        if (status === "unauthenticated") {
+            router.push("/");
+        } else {
+            async function fetchBalance() {
+                const { data, error } = await supabase.from("users").select("balance").eq("id", session?.user?.id).single();
+                if (data) setBalance(data.balance);
+            }
+            if (session?.user?.id) fetchBalance();
         }
-        fetchBalance();
-    }, []);
+    }, [session, status]);
+
+    if (status === "loading") return <p>Loading...</p>;
 
     return (
         <div>
-            <h1>Your Balance: ${balance.toFixed(2)}</h1>
-            <button onClick={() => axios.post("/api/deposit")}>Deposit Funds</button>
-            <button onClick={() => axios.post("/api/redeem")}>Redeem Gift Card</button>
-            <button onClick={() => axios.post("/api/withdraw")}>Withdraw to PayPal</button>
+            <h1>Dashboard</h1>
+            <p>Welcome, {session?.user?.email}</p>
+            <p>Your Balance: ${balance.toFixed(2)}</p>
+            <button onClick={() => signOut()}>Logout</button>
         </div>
     );
 }

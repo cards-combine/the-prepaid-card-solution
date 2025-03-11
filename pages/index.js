@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 
 export default function Home() {
@@ -7,18 +7,42 @@ export default function Home() {
     const [password, setPassword] = useState("");
     const router = useRouter();
 
-    async function handleAuth(action) {
-        const res = await axios.post("/api/auth", { email, password, action });
-        if (res.data.user) router.push("/dashboard");
+    async function handleLogin() {
+        const res = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+        });
+
+        if (!res.error) {
+            router.push("/dashboard");
+        } else {
+            alert("Login failed! Check your credentials.");
+        }
+    }
+
+    async function handleSignup() {
+        const res = await fetch("/api/auth/signup", {
+            method: "POST",
+            body: JSON.stringify({ email, password }),
+            headers: { "Content-Type": "application/json" },
+        });
+
+        const data = await res.json();
+        if (data.error) {
+            alert(data.error);
+        } else {
+            alert("Signup successful! Now log in.");
+        }
     }
 
     return (
         <div>
-            <h1>Cards Combine Login</h1>
+            <h1>Cards Combine - Login</h1>
             <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
             <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-            <button onClick={() => handleAuth("login")}>Login</button>
-            <button onClick={() => handleAuth("signup")}>Signup</button>
+            <button onClick={handleLogin}>Login</button>
+            <button onClick={handleSignup}>Signup</button>
         </div>
     );
 }
