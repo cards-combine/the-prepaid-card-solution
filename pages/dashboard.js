@@ -13,12 +13,13 @@ export default function Dashboard() {
             router.push("/");
         } else {
             async function fetchBalance() {
-                const { data, error } = await supabase.from("users").select("balance").eq("id", session?.user?.id).single();
+                const { data } = await supabase.from("users").select("balance").eq("id", session?.user?.id).single();
                 if (data) setBalance(data.balance);
             }
             if (session?.user?.id) fetchBalance();
         }
-    }, [session, status]);
+    }, [session, status, router]); // ✅ Added router
+    
 
     if (status === "loading") return <p>Loading...</p>;
 
