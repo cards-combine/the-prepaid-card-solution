@@ -10,16 +10,15 @@ export default function Dashboard() {
 
     useEffect(() => {
         if (status === "unauthenticated") {
-            router.push("/");
-        } else {
+            router.replace("/"); // ✅ Redirect to login if not authenticated
+        } else if (session?.user?.id) {
             async function fetchBalance() {
                 const { data } = await supabase.from("users").select("balance").eq("id", session?.user?.id).single();
                 if (data) setBalance(data.balance);
             }
-            if (session?.user?.id) fetchBalance();
+            fetchBalance();
         }
-    }, [session, status, router]); // ✅ Added router
-    
+    }, [session, status, router]);
 
     if (status === "loading") return <p>Loading...</p>;
 

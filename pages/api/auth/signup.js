@@ -1,11 +1,12 @@
 import { supabase } from "../../../lib/supabase";
 
 export default async function handler(req, res) {
-    if (req.method !== "POST") return res.status(405).end();
+    if (req.method !== "POST") {
+        return res.status(405).json({ error: "Method Not Allowed" });
+    }
 
-    const { email, password } = JSON.parse(req.body);
+    const { email, password } = req.body; // ✅ No need to JSON.parse
 
-    // Create user in Supabase
     const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {

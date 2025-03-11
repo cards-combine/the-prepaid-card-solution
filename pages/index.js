@@ -11,13 +11,17 @@ export default function Home() {
         const res = await signIn("credentials", {
             email,
             password,
-            redirect: false,
+            redirect: false, 
+            callbackUrl: "/dashboard", 
         });
 
-        if (!res.error) {
-            router.push("/dashboard");
-        } else {
+        console.log("Login Response:", res);
+
+        if (res?.error) {
             alert("Login failed! Check your credentials.");
+        } else {
+            alert("Login successful! Redirecting...");
+            window.location.href = res.url || "/dashboard"; 
         }
     }
 
@@ -29,7 +33,7 @@ export default function Home() {
         });
 
         const data = await res.json();
-        if (data.error) {
+        if (data?.error) {
             alert(data.error);
         } else {
             alert("Signup successful! Now log in.");
@@ -42,7 +46,7 @@ export default function Home() {
             <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
             <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
             <button onClick={handleLogin}>Login</button>
-            <button onClick={handleSignup}>Signup</button>
+            <button onClick={handleSignup}>Signup</button> 
         </div>
     );
 }
